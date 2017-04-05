@@ -59,7 +59,8 @@
 
 (defgroup sword-to-org nil
   "Settings for `sword-to-org'."
-  :link '(url-link "http://github.com/alphapapa/sword-to-org"))
+  :link '(url-link "http://github.com/alphapapa/sword-to-org")
+  :group 'org)
 
 (defcustom sword-to-org-default-module nil
   "Default module (e.g. Bible translation, like \"ESV\") to use."
