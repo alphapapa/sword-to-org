@@ -132,7 +132,8 @@ Examples:
   "Parse TEXT line-by-line, returning list of verse plists.
 When KEEP-NEWLINES is non-nil, keep blank lines in text.
 
-Plists are in format (:book \"Genesis\" :chapter 1 :verse 1 :text \"In the beginning...\").
+Plists are in format (:book \"Genesis\" :chapter 1 :verse 1
+                      :text \"In the beginning...\").
 
 Example:
 
@@ -159,11 +160,14 @@ Example:
 
 (defun sword-to-org--diatheke-parse-line (line)
   "Return plist from LINE.  If LINE is not the beginning of a verse, return nil.
-You generally don't want to use this directly.  Instead use `sword-to-org--diatheke-parse-text'.
+You generally don't want to use this directly.  Instead use
+`sword-to-org--diatheke-parse-text'.
 
-Plist is in format (:book \"Genesis\" :chapter 1 :verse 1 :text \"In the beginning...\").
+Plist is in format (:book \"Genesis\" :chapter 1 :verse 1
+                    :text \"In the beginning...\").
 
-For a complete example, see how `sword-to-org--diatheke-parse-text' calls this function."
+For a complete example, see how
+`sword-to-org--diatheke-parse-text' calls this function."
   (if (s-present? line)
       (when (string-match sword-to-org--diatheke-parse-line-regexp line)
         (let ((book (match-string 1 line))
