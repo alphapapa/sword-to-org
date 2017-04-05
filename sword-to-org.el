@@ -74,6 +74,7 @@
 
 ;;;;; Commands
 
+;;;###autoload
 (defun sword-to-org-insert-outline (module key)
   "Insert Org outline in current buffer for Sword MODULE and KEY.
 The buffer will be switched to `text-mode' before inserting, to
