@@ -1,10 +1,12 @@
 * sword-to-org
 
-This package uses the =diatheke= program to convert Sword modules to Org-mode outlines.  For example, you can make an Org file containing the entire text of the ESV module as an outline structured by book/chapter/verse.  Then you can add top-level headings for Old/New Testaments, and then you have the whole Bible as an Org file.  Then you can do everything you can do in Org with the text of the Bible!  Add footnotes, links, tags, properties, write your own commentaries under subheadings, organize research with TODO items, export with =org-export=, search with =helm-org-rifle=, etc.  The list is endless.
+This package uses =[[https://crosswire.org/wiki/Frontends:Diatheke][diatheke]]= to convert Sword modules to Org-mode outlines.  For example, you can make an Org file containing the entire text of the ESV module as an outline structured by book/chapter/verse.  Then you can add top-level headings for Old/New Testaments, and then you have the whole Bible as an Org file.  Then you can do everything you can do in Org with the text of the Bible!  Add footnotes, links, tags, properties, write your own commentaries under subheadings, organize research with TODO items, export with =org-export=, search with =helm-org-rifle=, etc.  The list is endless.
 
 [[screenshot.png]]
 
 ** Usage
+
+First install =[[https://crosswire.org/wiki/Frontends:Diatheke][diatheke]]=.  On Debian/Ubuntu it's in the =diatheke= package.
 
 Open a buffer and run the command =sword-to-org-insert-outline=.  Choose the module (e.g. Bible translation) to use, then input a passage reference or range (e.g. ~Gen 1~, ~Jn 1:1~, or even ~Gen-Rev~ —that last one will take a few moments), and an Org outline will be inserted in book/chapter/verse/text structure.
 

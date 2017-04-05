@@ -21,6 +21,9 @@
 
 ;;; Usage:
 
+;; First install `diatheke'.  On Debian/Ubuntu it's in the `diatheke'
+;; package.
+
 ;; Open a buffer and run the command `sword-to-org-insert-outline'.
 ;; Choose the module (e.g. Bible translation) to use, then input a
 ;; passage reference or range (e.g. "Gen 1", "Jn 1:1", or even
