@@ -1,7 +1,7 @@
 addons:
   apt:
     packages:
-      - git
+    - git
 
 before_install:
   - sudo apt-get -yq update
@@ -18,7 +18,7 @@ before_install:
   - export PATH=$HOME/.cask/bin:$PATH
   - cask
 
- env:
+env:
   - EVM_EMACS=emacs-24.3-travis
   - EVM_EMACS=emacs-24.4-travis
   - EVM_EMACS=emacs-24.5-travis
