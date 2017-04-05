@@ -3,7 +3,7 @@
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; Url: http://github.com/alphapapa/sword-to-org
 ;; Version: 0.0.1-pre
-;; Package-Requires: ((emacs "24.4") (dash "2.12") (s "1.10.0"))
+;; Package-Requires: ((emacs "24.4") (dash "2.11") (s "1.10.0"))
 ;; Keywords: outlines, org-mode, sword, research, bible
 
 ;;; Commentary:
@@ -117,7 +117,7 @@ This simply calls `diatheke -b MODULE -k KEY' and returns the raw output.
 
 Examples:
 
-(sword-to-org--diatheke-get-text \"ESV\" \"gen 1:1\")"
+\(sword-to-org--diatheke-get-text \"ESV\" \"gen 1:1\")"
   (with-temp-buffer
     (call-process "diatheke" nil '(t nil) nil
                   "-b" module "-k" key)
@@ -135,7 +135,7 @@ Plists are in format (:book \"Genesis\" :chapter 1 :verse 1 :text \"In the begin
 
 Example:
 
-(sword-to-org--diatheke-parse-text
+\(sword-to-org--diatheke-parse-text
   (sword-to-org--diatheke-get-text \"ESV\" \"Philemon 1:1-3\")
   :keep-newlines t)"
   (cl-loop with result
