@@ -1,3 +1,45 @@
+;;; sword-to-org.el --- Convert Sword modules to Org outlines
+
+;; Author: Adam Porter <adam@alphapapa.net>
+;; Url: http://github.com/alphapapa/sword-to-org
+;; Version: 0.0.1-pre
+;; Package-Requires: ((emacs "24.4") (dash "2.12") (s "1.10.0"))
+;; Keywords: outlines, org-mode, sword, research, bible
+
+;;; Commentary:
+
+;; This package uses the `diatheke' program to convert Sword modules
+;; to Org-mode outlines.  For example, you can write an Org file
+;; containing the entire text of the ESV module as an outline
+;; structured by book/chapter/verse.  Then you can add top-level
+;; headings for Old/New Testaments, and then you have the whole Bible
+;; as an Org file.  Then you can do everything you can do in Org with
+;; the text of the Bible!  Add footnotes, links, tags, properties,
+;; write your own commentaries under subheadings, organize research
+;; with TODO items, export with `org-export', search with
+;; `helm-org-rifle', etc.  The list is endless.
+
+;;; Usage:
+
+;; Open a buffer and run the command `sword-to-org-insert-outline'.
+
+;; (sword-to-org--diatheke-get-text "ESV" "gen 1:1")
+
+;; (sword-to-org--diatheke-parse-line (sword-to-org--diatheke-get-text "ESV" "gen 1:1"))
+
+;; (cl-loop for verse-number in '(1 2 3) append (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text "ESV" (number-to-string verse-number))))
+
+;; (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text "ESV" "Philemon 1:1-3") :keep-newlines t)
+
+;;; Code:
+
+;;;; Requirements
+
+(require 'dash)
+(require 's)
+
+;;;; Variables
+
 (defconst sword-to-org--diatheke-parse-line-regexp
   (rx bol
       ;; Book name
@@ -6,23 +48,61 @@
       ;; chapter:verse
       (group-n 2 (1+ digit)) ":" (group-n 3 (1+ digit)) ":"
       space
+      ;; Passage text
       (group-n 4 (1+ anything))))
 
-(defun sword-to-org-write-org-to-buffer (module key)
-  "Write Org outline to current buffer for Sword MODULE and KEY."
-  (cl-loop with last-book
-           with last-chapter
-           for passage in (sword-to-org--diatheke-parse-text
-                           (sword-to-org--diatheke-get-text module key))
-           do (-let (((&plist :book book :chapter chapter :verse verse :text text) passage))
-                (unless (equal book last-book)
-                  (insert (format "** %s\n\n" book))
-                  (setq last-chapter nil)
-                  (setq last-book book))
-                (unless (equal chapter last-chapter)
-                  (insert (format "*** %s %s\n\n" book chapter))
-                  (setq last-chapter chapter))
-                (insert (format "**** %s %s:%s\n\n%s\n\n" book chapter verse text)))))
+(defgroup sword-to-org nil
+  "Settings for `sword-to-org'."
+  :link '(url-link "http://github.com/alphapapa/sword-to-org"))
+
+(defcustom sword-to-org-default-module nil
+  "Default module (e.g. Bible translation, like \"ESV\") to use."
+  :type '(choice (const :tag "None" nil)
+                 (string :tag "Module abbreviation (e.g. \"ESV\")")))
+
+;;;; Functions
+
+;;;;; Commands
+
+(defun sword-to-org-insert-outline (module key)
+  "Insert Org outline in current buffer for Sword MODULE and KEY.
+The buffer will be switched to `text-mode' before inserting, to
+improve performance, and then switched back to `org-mode' if
+it was active."
+  (interactive (list (if (or current-prefix-arg
+                             (not sword-to-org-default-module))
+                         (completing-read "Module: " (sword-to-org--diatheke-get-modules))
+                       sword-to-org-default-module)
+                     (read-from-minibuffer "Passage: ")))
+  (let ((was-org-mode (eq major-mode 'org-mode)))
+    (when was-org-mode
+      (text-mode))
+    (cl-loop with last-book
+             with last-chapter
+             for passage in (sword-to-org--diatheke-parse-text
+                             (sword-to-org--diatheke-get-text module key))
+             do (-let (((&plist :book book :chapter chapter :verse verse :text text) passage))
+                  (unless (equal book last-book)
+                    (insert (format "** %s\n\n" book))
+                    (setq last-chapter nil)
+                    (setq last-book book))
+                  (unless (equal chapter last-chapter)
+                    (insert (format "*** %s %s\n\n" book chapter))
+                    (setq last-chapter chapter))
+                  (insert (format "**** %s %s:%s\n\n%s\n\n" book chapter verse text))))
+    (when was-org-mode
+      (org-mode))))
+
+;;;;; Support
+
+(defun sword-to-org--diatheke-get-modules ()
+  "Return list of Sword modules from diatheke."
+  (cl-loop for line in (s-lines (with-temp-buffer
+                                  (call-process "diatheke" nil '(t nil) nil
+                                                "-b" "system" "-k" "modulelist")
+                                  (buffer-string)))
+           when (string-match (rx (minimal-match (1+ (not (any ":")))) " : ") line)
+           collect (car (s-split " : " line))))
 
 (defun sword-to-org--diatheke-get-text (module key)
   "Get text from diatheke MODULE for KEY."
@@ -67,11 +147,4 @@ When KEEP-NEWLINES is non-nil, keep blank lines in text."
               (text (s-trim (match-string 4 line))))
           (list :book book :chapter chapter :verse verse :text text)))))
 
-
-;; (sword-to-org--diatheke-get-text "ESV" "gen 1:1")
-
-;; (sword-to-org--diatheke-parse-line (sword-to-org--diatheke-get-text "ESV" "gen 1:1"))
-
-;; (cl-loop for verse-number in '(1 2 3) append (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text "ESV" (number-to-string verse-number))))
-
-;; (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text "ESV" "Philemon 1:1-3") :keep-newlines t)
+;;; sword-to-org.el ends here
