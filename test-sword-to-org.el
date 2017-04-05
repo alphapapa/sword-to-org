@@ -1,4 +1,4 @@
-(require 'buttercup)
+(require 'sword-to-org)
 
 (defconst test-sword-to-org-john-1-esv-outline "** John
 
