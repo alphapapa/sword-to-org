@@ -28,7 +28,7 @@ All things were made through him, and without him was not any thing made that wa
                         (:book "Genesis" :chapter 1 :verse 2 :text "The earth was without form and void, and darkness was over the face of the deep. And the Spirit of God was hovering over the face of the waters.")
                         (:book "Genesis" :chapter 1 :verse 3 :text "And God said, Let there be light, and there was light."))))
 
-  (it "Can get Philemon 1-3 from the ESV with Diatheke"
+  (it "Can get Philemon 1-3 from the ESV with Diatheke, keeping newlines"
     (expect (sword-to-org--diatheke-parse-text
              (sword-to-org--diatheke-get-text "ESV" "Philemon 1:1-3")
              :keep-newlines t)
