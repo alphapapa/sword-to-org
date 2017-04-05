@@ -113,8 +113,8 @@ Only the module abbreviation is returned."
                                   (call-process "diatheke" nil '(t nil) nil
                                                 "-b" "system" "-k" "modulelist")
                                   (buffer-string)))
-           when (string-match (rx (minimal-match (1+ (not (any ":")))) " : ") line)
-           collect (car (s-split " : " line))))
+           when (string-match (rx (group-n 1 (minimal-match (1+ (not (any ":"))))) " : ") line)
+           collect (match-string 1 line)))
 
 (defun sword-to-org--diatheke-get-text (module key)
   "Return raw text from diatheke MODULE for KEY.
