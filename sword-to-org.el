@@ -23,22 +23,17 @@
 
 ;; Open a buffer and run the command `sword-to-org-insert-outline'.
 ;; Choose the module (e.g. Bible translation) to use, then input a
-;; passage reference, and an Org outline will be inserted.
+;; passage reference or range (e.g. "Gen 1", "Jn 1:1", or even
+;; "Gen-Rev"--that last one will take a few moments), and an Org
+;; outline will be inserted in book/chapter/verse/text structure.
 
 ;; You may customize `sword-to-org-default-module' so you don't have
 ;; to pick a module every time, and you can call the command with a
 ;; universal prefix (`C-u') to choose a different module.
 
 ;; You may also use any of the `sword-to-org--' support functions in
-;; your own programs.  Consult the docstrings for instructions.
-
-;; (sword-to-org--diatheke-get-text "ESV" "gen 1:1")
-
-;; (sword-to-org--diatheke-parse-line (sword-to-org--diatheke-get-text "ESV" "gen 1:1"))
-
-;; (cl-loop for verse-number in '(1 2 3) append (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text "ESV" (number-to-string verse-number))))
-
-;; (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text "ESV" "Philemon 1:1-3") :keep-newlines t)
+;; your own programs.  Consult the docstrings for instructions and
+;; examples.
 
 ;;; Code:
 
@@ -59,7 +54,8 @@
       (group-n 2 (1+ digit)) ":" (group-n 3 (1+ digit)) ":"
       space
       ;; Passage text
-      (group-n 4 (1+ anything))))
+      (group-n 4 (1+ anything)))
+  "Regexp to parse each line of output from `diatheke'.")
 
 (defgroup sword-to-org nil
   "Settings for `sword-to-org'."
