@@ -144,8 +144,7 @@ Example:
            for parsed = (sword-to-org--diatheke-parse-line line)
            if parsed
            do (progn
-                (when new-verse
-                  (push new-verse result))
+                (push new-verse result)
                 (setq new-verse parsed))
            else do (let* ((text (plist-get new-verse :text))
                           (new-text (concat text
@@ -153,9 +152,9 @@ Example:
                                                 line
                                               (when keep-newlines "\n")))))
                      (plist-put new-verse :text new-text))
-           finally return (progn
-                            (push new-verse result)
-                            (nreverse result))))
+           finally return (cdr (progn
+                                 (push new-verse result)
+                                 (nreverse result)))))
 
 (defun sword-to-org--diatheke-parse-line (line)
   "Return plist from LINE.  If LINE is not the beginning of a verse, return nil.
