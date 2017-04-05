@@ -22,6 +22,15 @@
 ;;; Usage:
 
 ;; Open a buffer and run the command `sword-to-org-insert-outline'.
+;; Choose the module (e.g. Bible translation) to use, then input a
+;; passage reference, and an Org outline will be inserted.
+
+;; You may customize `sword-to-org-default-module' so you don't have
+;; to pick a module every time, and you can call the command with a
+;; universal prefix (`C-u') to choose a different module.
+
+;; You may also use any of the `sword-to-org--' support functions in
+;; your own programs.  Consult the docstrings for instructions.
 
 ;; (sword-to-org--diatheke-get-text "ESV" "gen 1:1")
 
@@ -96,7 +105,8 @@ it was active."
 ;;;;; Support
 
 (defun sword-to-org--diatheke-get-modules ()
-  "Return list of Sword modules from diatheke."
+  "Return list of Sword modules from diatheke.
+Only the module abbreviation is returned."
   (cl-loop for line in (s-lines (with-temp-buffer
                                   (call-process "diatheke" nil '(t nil) nil
                                                 "-b" "system" "-k" "modulelist")
@@ -105,7 +115,12 @@ it was active."
            collect (car (s-split " : " line))))
 
 (defun sword-to-org--diatheke-get-text (module key)
-  "Get text from diatheke MODULE for KEY."
+  "Return raw text from diatheke MODULE for KEY.
+This simply calls `diatheke -b MODULE -k KEY' and returns the raw output.
+
+Examples:
+
+(sword-to-org--diatheke-get-text \"ESV\" \"gen 1:1\")"
   (with-temp-buffer
     (call-process "diatheke" nil '(t nil) nil
                   "-b" module "-k" key)
@@ -117,7 +132,15 @@ it was active."
 
 (defun sword-to-org--diatheke-parse-text (text &optional &key keep-newlines)
   "Parse TEXT line-by-line, returning list of verse plists.
-When KEEP-NEWLINES is non-nil, keep blank lines in text."
+When KEEP-NEWLINES is non-nil, keep blank lines in text.
+
+Plists are in format (:book \"Genesis\" :chapter 1 :verse 1 :text \"In the beginning...\").
+
+Example:
+
+(sword-to-org--diatheke-parse-text
+  (sword-to-org--diatheke-get-text \"ESV\" \"Philemon 1:1-3\")
+  :keep-newlines t)"
   (cl-loop with result
            with new-verse
            for line in (s-lines text)
@@ -138,7 +161,12 @@ When KEEP-NEWLINES is non-nil, keep blank lines in text."
                             (nreverse result))))
 
 (defun sword-to-org--diatheke-parse-line (line)
-  "Return parsed plist from LINE."
+  "Return plist from LINE.  If LINE is not the beginning of a verse, return nil.
+You generally don't want to use this directly.  Instead use `sword-to-org--diatheke-parse-text'.
+
+Plist is in format (:book \"Genesis\" :chapter 1 :verse 1 :text \"In the beginning...\").
+
+For a complete example, see how `sword-to-org--diatheke-parse-text' calls this function."
   (if (s-present? line)
       (when (string-match sword-to-org--diatheke-parse-line-regexp line)
         (let ((book (match-string 1 line))
@@ -146,5 +174,7 @@ When KEEP-NEWLINES is non-nil, keep blank lines in text."
               (verse (string-to-number (match-string 3 line)))
               (text (s-trim (match-string 4 line))))
           (list :book book :chapter chapter :verse verse :text text)))))
+
+(provide 'sword-to-org)
 
 ;;; sword-to-org.el ends here
