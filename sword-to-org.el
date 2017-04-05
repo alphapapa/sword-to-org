@@ -9,7 +9,7 @@
 ;;; Commentary:
 
 ;; This package uses the `diatheke' program to convert Sword modules
-;; to Org-mode outlines.  For example, you can write an Org file
+;; to Org-mode outlines.  For example, you can make an Org file
 ;; containing the entire text of the ESV module as an outline
 ;; structured by book/chapter/verse.  Then you can add top-level
 ;; headings for Old/New Testaments, and then you have the whole Bible
