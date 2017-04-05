@@ -8,6 +8,22 @@
       space
       (group-n 4 (1+ anything))))
 
+(defun sword-to-org-write-org-to-buffer (module key)
+  "Write Org outline to current buffer for Sword MODULE and KEY."
+  (cl-loop with last-book
+           with last-chapter
+           for passage in (sword-to-org--diatheke-parse-text
+                           (sword-to-org--diatheke-get-text module key))
+           do (-let (((&plist :book book :chapter chapter :verse verse :text text) passage))
+                (unless (equal book last-book)
+                  (insert (format "** %s\n\n" book))
+                  (setq last-chapter nil)
+                  (setq last-book book))
+                (unless (equal chapter last-chapter)
+                  (insert (format "*** %s %s\n\n" book chapter))
+                  (setq last-chapter chapter))
+                (insert (format "**** %s %s:%s\n\n%s\n\n" book chapter verse text)))))
+
 (defun sword-to-org--diatheke-get-text (module key)
   "Get text from diatheke MODULE for KEY."
   (with-temp-buffer
