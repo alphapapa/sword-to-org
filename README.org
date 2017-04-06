@@ -18,6 +18,12 @@ You may also use any of the =sword-to-org--= support functions in your own progr
 
 Contributions are welcome!
 
+*** Ideas
+
+**** MAYBE Rename, expand 
+
+Might want to rename to, say, =org-sword=, and add commands to search =diatheke= for keywords, etc.
+
 ** Credits
 
 +  Thanks to [[https://github.com/syohex][Syohei YOSHIDA]] and [[https://github.com/purcell][Steve Purcell]] for their tireless work curating MELPA.
