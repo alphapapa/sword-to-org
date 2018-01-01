@@ -55,9 +55,10 @@
       space
       ;; chapter:verse
       (group-n 2 (1+ digit)) ":" (group-n 3 (1+ digit)) ":"
-      space
-      ;; Passage text
-      (group-n 4 (1+ anything)))
+      ;; Passage text (which may start with a newline, in which case
+      ;; no text will be on the same line after chapter:verse)
+      (optional (1+ space)
+                (group-n 4 (1+ anything))))
   "Regexp to parse each line of output from `diatheke'.")
 
 (defgroup sword-to-org nil
@@ -177,7 +178,11 @@ For a complete example, see how
         (let ((book (match-string 1 line))
               (chapter (string-to-number (match-string 2 line)))
               (verse (string-to-number (match-string 3 line)))
-              (text (s-trim (match-string 4 line))))
+              ;; Ensure text is present, which may not be the case if
+              ;; a verse starts with a newline.  See
+              ;; <https://github.com/alphapapa/sword-to-org/issues/2>
+              (text (when (s-present? (match-string 4 line))
+                      (s-trim (match-string 4 line)))))
           (list :book book :chapter chapter :verse verse :text text)))))
 
 (provide 'sword-to-org)
