@@ -6,7 +6,7 @@ This package uses [[https://crosswire.org/wiki/Frontends:Diatheke][=diatheke=]] 
 
 *** Installation
 
-1.  First install [[https://crosswire.org/wiki/Frontends:Diatheke][=diatheke=]].  On Debian/Ubuntu it's in the =diatheke= package.
+1.  Install [[https://crosswire.org/wiki/Frontends:Diatheke][Diatheke]].  On Debian/Ubuntu it's in the =diatheke= package.
 2.  Put =org-sword.el= in your =load-path= and eval =(require 'org-sword)= (=use-package= is recommended for your init file).
 
 *** Commands
