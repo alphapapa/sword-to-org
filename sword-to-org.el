@@ -86,22 +86,12 @@ it was active."
                          (completing-read "Module: " (sword-to-org--diatheke-get-modules))
                        sword-to-org-default-module)
                      (read-from-minibuffer "Passage: ")))
-  (let ((was-org-mode (eq major-mode 'org-mode)))
+  (let ((was-org-mode (eq major-mode 'org-mode))
+        (passages (sword-to-org--diatheke-parse-text
+                   (sword-to-org--diatheke-get-text module key))))
     (when was-org-mode
       (text-mode))
-    (cl-loop with last-book
-             with last-chapter
-             for passage in (sword-to-org--diatheke-parse-text
-                             (sword-to-org--diatheke-get-text module key))
-             do (-let (((&plist :book book :chapter chapter :verse verse :text text) passage))
-                  (unless (equal book last-book)
-                    (insert (format "** %s\n\n" book))
-                    (setq last-chapter nil)
-                    (setq last-book book))
-                  (unless (equal chapter last-chapter)
-                    (insert (format "*** %s %s\n\n" book chapter))
-                    (setq last-chapter chapter))
-                  (insert (format "**** %s %s:%s\n\n%s\n\n" book chapter verse text))))
+    (insert (org-sword--passages-to-outline passages))
     (when was-org-mode
       (org-mode))))
 
@@ -122,7 +112,45 @@ at the end."
   (when (not separate-lines)
     (insert " (" key ")")))
 
+;;;###autoload
+(defun org-sword-search (key &optional module)
+  "Search Diatheke for KEY in MODULE and present the passages as an Org buffer."
+  (interactive (list (read-from-minibuffer "Search: ")
+                     (if (or current-prefix-arg
+                             (not sword-to-org-default-module))
+                         (completing-read "Module: " (sword-to-org--diatheke-get-modules))
+                       sword-to-org-default-module)))
+  (when-let ((references (org-sword--diatheke-search module key))
+             (passages (org-sword--diatheke-passages module references))
+             (tree (org-sword--passages-to-outline passages)))
+    (pop-to-buffer (get-buffer-create "*Org-Sword search*"))
+    (unless (equal major-mode 'org-mode)
+      (insert "Search results:\n")
+      (org-mode))
+    (goto-char (point-max))
+    (insert "\n" "* " key "\n")
+    (org-paste-subtree 2 tree)
+    (insert "\n\n")
+    (org-cycle '(64))))
+
 ;;;;; Support
+
+(defun org-sword--passages-to-outline (passages)
+  "Return PASSAGES as an Org outline string."
+  (with-temp-buffer
+    (cl-loop with last-book
+             with last-chapter
+             for passage in passages
+             do (-let (((&plist :book book :chapter chapter :verse verse :text text) passage))
+                  (unless (equal book last-book)
+                    (insert (format "** %s\n\n" book))
+                    (setq last-chapter nil)
+                    (setq last-book book))
+                  (unless (equal chapter last-chapter)
+                    (insert (format "*** %s %s\n\n" book chapter))
+                    (setq last-chapter chapter))
+                  (insert (format "**** %s %s:%s\n\n%s\n\n" book chapter verse text))))
+    (buffer-string)))
 
 (cl-defun sword-to-org--passage (key &key module paragraph)
   "Return string for passage reference KEY.
@@ -150,6 +178,34 @@ Only the module abbreviation is returned."
                                   (buffer-string)))
            when (string-match (rx (group-n 1 (minimal-match (1+ (not (any ":"))))) " : ") line)
            collect (match-string 1 line)))
+
+(defun org-sword--diatheke-search (module key)
+  "Return list of references for KEY in MODULE."
+  (let* ((raw (with-temp-buffer
+                (call-process "diatheke" nil '(t nil) nil
+                              "-b" module
+                              "-s" "multiword"
+                              "-k" key)
+                (buffer-substring (point-min) (save-excursion
+                                                (goto-char (point-max))
+                                                (forward-line -2)
+                                                (end-of-line)
+                                                (point)))))
+         (regexp (rx-to-string `(seq "Verses containing \"" ,key "\"-- "
+                                     (group (1+ anything))
+                                     " -- " (1+ digit) " matches total (" ,module ")")))
+         (passages-raw (if (string-match regexp raw)
+                           (match-string 1 raw)
+                         (user-error "No results found"))))
+    (s-split " ; " passages-raw 'omit-nulls)))
+
+(defun org-sword--diatheke-passages (module refs)
+  "Return list of passages for REFS.
+
+List is in format (:book \"Genesis\" :chapter 1 :verse 1
+                   :text \"In the beginning...\")."
+  (sword-to-org--diatheke-parse-text
+   (sword-to-org--diatheke-get-text module (s-join "; " refs))))
 
 (defun sword-to-org--diatheke-get-text (module key)
   "Return raw text from diatheke MODULE for KEY.

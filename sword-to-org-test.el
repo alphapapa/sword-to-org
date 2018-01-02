@@ -44,4 +44,11 @@ To Philemon our beloved fellow worker")
     (expect (with-temp-buffer
               (sword-to-org-insert-outline "ESV" "John 1:1-3")
               (buffer-substring-no-properties (point-min) (point-max)))
-            :to-equal test-sword-to-org-john-1-esv-outline)))
+            :to-equal test-sword-to-org-john-1-esv-outline))
+
+;;;;; Searching
+
+  (describe "Searching"
+    (it "Can get a list of references for the key \"Jesus Lazarus\""
+      (expect (org-sword--diatheke-search "ESV" "Jesus Lazarus")
+              :to-equal '("John 11:5" "John 11:14" "John 11:17" "John 12:1" "John 12:9")))))

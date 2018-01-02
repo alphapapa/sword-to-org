@@ -1,4 +1,4 @@
-* sword-to-org
+* org-sword
 
 This package uses [[https://crosswire.org/wiki/Frontends:Diatheke][=diatheke=]] to convert Sword modules to Org-mode outlines.  For example, you can make an Org file containing the entire text of the ESV module as an outline structured by book/chapter/verse.  Then you can add top-level headings for Old/New Testaments, and then you have the whole Bible as an Org file.  Then you can do everything you can do in Org with the text of the Bible!  Add footnotes, links, tags, properties, write your own commentaries under subheadings, organize research with TODO items, export with =org-export=, search with =helm-org-rifle=, etc.  The list is endless.
 
@@ -6,15 +6,32 @@ This package uses [[https://crosswire.org/wiki/Frontends:Diatheke][=diatheke=]] 
 
 ** Usage
 
-First install [[https://crosswire.org/wiki/Frontends:Diatheke][=diatheke=]].  On Debian/Ubuntu it's in the =diatheke= package.
+*** Installation
 
-Open a buffer and run the command =sword-to-org-insert-outline=.  Choose the module (e.g. Bible translation) to use, then input a passage reference or range (e.g. ~Gen 1~, ~Jn 1:1~, or even ~Gen-Rev~ —that last one will take a few moments), and an Org outline will be inserted in book/chapter/verse/text structure.  Call the command with a universal prefix (=C-u=) to choose a different module.
+1.  First install [[https://crosswire.org/wiki/Frontends:Diatheke][=diatheke=]].  On Debian/Ubuntu it's in the =diatheke= package.
+2.  Put =org-sword.el= in your =load-path= and eval =(require 'org-sword)= (=use-package= is recommended for your init file).
 
-The command =sword-to-org-insert-passage= inserts a passage as plain text with one-verse-per-line.  Use prefix arguments to choose a different Sword module, and a double-prefix argument to insert as a single paragraph with reference at the end.
+*** Commands
 
-You may customize =sword-to-org-default-module= so you don't have to pick a module every time.
+You may customize =org-sword-default-module= so you don't have to pick a module every time.
 
-You may also use any of the =sword-to-org--= support functions in your own programs.  Consult the docstrings for instructions and examples.
+You may also use any of the =org-sword--= support functions in your own programs.  Consult the docstrings for instructions and examples.
+
+**** =org-sword-insert-outline=
+
+Insert passage as Org outline in current buffer.  
+
+Choose the module (e.g. Bible translation) to use, then input a passage reference or range (e.g. ~Gen 1~, ~Jn 1:1~, or even ~Gen-Rev~ —that last one will take a few moments), and an Org outline will be inserted in book/chapter/verse/text structure.  Call the command with a universal prefix (=C-u=) to choose a different module.
+
+**** =org-sword-insert-passage=
+
+Insert passage as plain-text in current buffer.
+
+This inserts a passage as plain text with one-verse-per-line.  Use prefix arguments to choose a different Sword module, and a double-prefix argument to insert as a single paragraph with reference at the end.
+
+**** =org-sword-search=
+
+Search Sword module for keywords and present results in an Org buffer.  Subsequent searches add to the results buffer if still open, making it easy to do several related searches and view the results for all of them.
 
 *** Export with Org Babel code block and macro
 
@@ -27,7 +44,7 @@ By including this code in your Org file, you can easily insert passages when exp
   ,#+NAME: Diatheke
   ,#+BEGIN_SRC emacs-lisp :var ref="" paragraph="" :exports results :results raw
     (concat "#+BEGIN_QUOTE" "\n"
-            (sword-to-org--passage ref :paragraph (s-present? paragraph))
+            (org-sword--passage ref :paragraph (s-present? paragraph))
             (when (s-present? paragraph)
               (concat "  (" ref ")")) "\n" 
             "#+END_QUOTE" "\n")
@@ -63,16 +80,9 @@ And that Jesus has conquered darkness:
       John 1:5 The light shines in the darkness, and the darkness
       has not overcome it.
 #+END_EXAMPLE
-
 ** Development
 
 Contributions are welcome!
-
-*** Ideas
-
-**** MAYBE Rename, expand 
-
-Might want to rename to, say, =org-sword=, and add commands to search =diatheke= for keywords, etc.
 
 ** Credits
 
