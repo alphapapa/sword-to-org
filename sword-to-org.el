@@ -105,7 +105,41 @@ it was active."
     (when was-org-mode
       (org-mode))))
 
+;;;###autoload
+(defun sword-to-org-insert-passage (key &optional separate-lines module)
+  "Insert passage for reference KEY as plain text.
+With prefix, prompt for module, otherwise use default module.
+With double-prefix, insert each verse on its own line with
+reference; otherwise, insert as single paragraph with reference
+at the end."
+  (interactive (list (read-from-minibuffer "Passage: ")
+                     (equal current-prefix-arg '(16))
+                     (if (or current-prefix-arg
+                             (not sword-to-org-default-module))
+                         (completing-read "Module: " (sword-to-org--diatheke-get-modules))
+                       sword-to-org-default-module)))
+  (insert (sword-to-org--passage key :module module :paragraph (not separate-lines)))
+  (when (not separate-lines)
+    (insert " (" key ")")))
+
 ;;;;; Support
+
+(cl-defun sword-to-org--passage (key &key module paragraph)
+  "Return string for passage reference KEY.
+If MODULE is nil, use default module.  If PARAGRAPH is non-nil,
+join all verses into a paragraph; otherwise put each verse on its
+own line with reference."
+  (unless module
+    (setq module sword-to-org-default-module))
+  (if paragraph
+      (s-join " " (cl-loop for passage in (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text module key))
+                           collect (plist-get passage :text)))
+    ;; NOTE: Using double-newline as verse separator so the verses
+    ;; can appear separately in Org exports from Org Babel blocks
+    ;; (for some reason, single newlines are replaced with spaces)
+    (s-join "\n\n" (cl-loop for passage in (sword-to-org--diatheke-parse-text (sword-to-org--diatheke-get-text module key))
+                            collect (-let (((&plist :book book :chapter chapter :verse verse :text text) passage))
+                                      (format "%s %s:%s  %s" book chapter verse text))))))
 
 (defun sword-to-org--diatheke-get-modules ()
   "Return list of Sword modules from diatheke.
