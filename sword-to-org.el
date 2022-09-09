@@ -160,6 +160,10 @@ Examples:
 \(sword-to-org--diatheke-get-text \"ESV\" \"gen 1:1\")"
   (with-temp-buffer
     (call-process "diatheke" nil '(t nil) nil
+                  ;; NOTE: Argument order matters for some versions of Diatheke
+                  ;; (i.e. moving "-f plain" to the end of the argument list
+                  ;; causes it to fail to parse the key correctly).
+                  "-f" "plain"
                   "-b" module "-k" key)
     (buffer-substring (point-min) (save-excursion
                                     (goto-char (point-max))
